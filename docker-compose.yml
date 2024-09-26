@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  rustdesk:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rustdesk_service
+    volumes:
+      - ./Downloads.bat:/app/Downloads.bat
+      - ./login.py:/app/login.py
+      - ./loop.bat:/app/loop.bat
+      - ./show.bat:/app/show.bat
+      - ./timelimit.py:/app/timelimit.py
+    command: cmd /c show.bat
+    working_dir: /app
