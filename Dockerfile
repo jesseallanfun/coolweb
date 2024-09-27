@@ -1,20 +1,25 @@
-# Menggunakan image dasar Windows
-FROM mcr.microsoft.com/windows/servercore:ltsc2019
+# Menggunakan image dasar Ubuntu (Linux)
+FROM ubuntu:22.04
 
 # Set working directory
-WORKDIR C:\\app
+WORKDIR /app
 
-# Copy semua file dari repository ke dalam Docker container
+# Install Python dan dependencies untuk menjalankan file batch
+RUN apt-get update && apt-get install -y \
+    python3 \
+    python3-pip \
+    dos2unix \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Salin semua file dari host ke container
 COPY . .
 
-# Install Python di Windows
-RUN powershell -Command \
-    $ErrorActionPreference = 'Stop'; \
-    Invoke-WebRequest -Uri "https://www.python.org/ftp/python/3.9.1/python-3.9.1-amd64.exe" -OutFile "python-installer.exe"; \
-    Start-Process python-installer.exe -ArgumentList '/quiet InstallAllUsers=1 PrependPath=1' -NoNewWindow -Wait
+# Konversi file batch (.bat) ke format Unix agar bisa dijalankan
+RUN dos2unix *.bat
 
-# Jalankan Downloads.bat
-RUN cmd /c Downloads.bat
+# Install dependencies Python (jika ada)
+RUN pip3 install -r requirements.txt || true
 
-# Set default command untuk menjalankan script show.bat
-CMD ["cmd", "/c", "show.bat"]
+# Jalankan file batch
+CMD ["bash", "-c", "chmod +x show.bat && ./show.bat"]
